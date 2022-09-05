@@ -36,7 +36,7 @@ New-Item -ItemType "Directory" -Path $toDir -Force > $null
 $lastBackup = $(Get-ChildItem -Path $to -Directory | sort Name | select -last 1)
 
 $fileFromBackup = $(Get-ChildItem -Path $from -Recurse -File | Sort -desc)
-$fileToBackup = $(Get-ChildItem -Path $lastBackup -Recurse -File | Sort -desc)
+$fileToBackup = $(Get-ChildItem -Path $(Join-Path -Path $lastBackup -ChildPath $folderName) -Recurse -File | Sort -desc)
 
 Write-Output """fullname"",""size""" > $log
 $intSize = 0
@@ -51,9 +51,7 @@ If ($lastBackup -ne $null) {
   foreach ($toFile in $fileToBackup) {
     $pathTo = $toFile.FullName.replace($(Join-Path -Path $lastBackup -ChildPath $folderName),'')
     $found = $False
-    $foundFile = $null
     foreach ($fromFile in $fileFromBackup) {
-      $foundFile = $fromFile
       $pathFrom = $fromFile.FullName.replace($from,'')
       If ($pathFrom -eq $pathTo) {
         $found = $True
@@ -70,7 +68,7 @@ If ($lastBackup -ne $null) {
 }
 
 write-msg "pwsh" "Gray" "Backup from '$folderName' to '$to'..."
-Copy-Item $from -Destination $(Join-Path -Path $to -ChildPath $(Get-Date -Format "yyyyMMdd")) -Recurse -Force
+Copy-Item $from -Destination $(Join-Path -Path $to -ChildPath $(Get-Date -Format "yyyyMMdd")) -Recurse -Force -Exclude $fileToBackup
 # $i = 0
 # foreach ($file in $fileFromBackup) {
 #   $i++
@@ -81,7 +79,5 @@ Copy-Item $from -Destination $(Join-Path -Path $to -ChildPath $(Get-Date -Format
 #   }
 #   Copy-Item $file.FullName -Destination $(Join-Path -Path $toDir -ChildPath $dir -AdditionalChildPath $file.Name) -Force
 # }
-write-msg "pwsh" "Gray" "Total file: $($fileFromBackup.Length)"
-write-msg "pwsh" "Gray" "Total size: $([Math]::Round($intSize/1MB,4,[MidPointRounding]::AwayFromZero)) MB."
-
+write-msg "pwsh" "Gray" "Total size: $([Math]::Round($intSize/1GB,4,[MidPointRounding]::AwayFromZero)) GB and file: $($fileFromBackup.Length)"
 write-msg "pwsh" "Green" "Backup complated."

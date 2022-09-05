@@ -8,16 +8,3 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 
 pwsh.exe -nol -File "%pwd%/engine.ps1" -from ""%1"" -to ""%2""
-IF %ERRORLEVEL% NEQ 0 (
-  GOTO FAIL
-) ELSE (
-  GOTO SUCCESS
-)
-
-:FAIL
-GOTO END
-
-:SUCCESS
-
-:END
-ECHO.

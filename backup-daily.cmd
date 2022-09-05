@@ -1,8 +1,13 @@
 @echo off
-SET pwd=%~dp0
-SET src=C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\Microsoft\NuGet
+SET backup=%~dp0/backup-daily/backup-dir
+SET src=C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\Microsoft
 SET dest=D:\dvgamerr\GitHub.com\pwsh-archived\temp
 
-CALL %pwd%/backup-daily/backup-dir "%src%\15.0" "%dest%"
+echo --- update source code from github.com ---
+git pull origin main
+echo ------------------------------------------
+cmd /c "%backup% "%src%\NuGet" "%dest%""
+cmd /c "%backup% "%src%\VisualStudio" "%dest%""
 
+echo.
 PAUSE
