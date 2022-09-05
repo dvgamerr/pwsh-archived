@@ -6,26 +6,21 @@ IF %ERRORLEVEL% NEQ 0 (
   ECHO PowerShell Core not found, Installation https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.2
   GOTO FAIL
 )
-ECHO %pwd%
-ECHO [pwsh] Initialize...
-IF NOT EXIST "%1" (
-  ECHO [pwsh] Not exists %1 directory. 
-  GOTO FAIL
-)
-
-IF NOT EXIST "%2" (
-  ECHO [pwsh] Not exists %2 directory. 
-  GOTO FAIL
-)
 
 pwsh.exe -nol -File "%pwd%/engine.ps1" -from "%1" -to "%2"
-GOTO SUCCESS
+IF %ERRORLEVEL% NEQ 0 (
+  GOTO FAIL
+) ELSE (
+  GOTO SUCCESS
+)
 
 :FAIL
-ECHO [pwsh] Fail, Quit!
+ECHO %TIME% Fail, Quit!
 GOTO END
 
 :SUCCESS
-ECHO [pwsh] Complated.
+ECHO %TIME% Complated.
 
 :END
+ECHO.
+PAUSE
