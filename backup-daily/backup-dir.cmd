@@ -15,11 +15,9 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 
 :FAIL
-ECHO %TIME% Fail, Quit!
 GOTO END
 
 :SUCCESS
-ECHO %TIME% Complated.
 
 :END
 ECHO.
