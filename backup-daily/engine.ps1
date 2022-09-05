@@ -33,7 +33,7 @@ $log = $(Join-Path -Path $to -ChildPath "$($dateTime)_$($folderName).txt")
 $toDir = $(Join-Path -Path $to -ChildPath $(Get-Date -Format "yyyyMMdd") -AdditionalChildPath $folderName)
 New-Item -ItemType "Directory" -Path $toDir -Force > $null
 
-$lastBackup = $(Get-ChildItem -Path $toDir -Directory | sort Name | select -last 1)
+$lastBackup = $(Get-ChildItem -Path $to -Directory | sort Name | select -last 1)
 
 $fileFromBackup = $(Get-ChildItem -Path $from -Recurse -File | Sort -desc)
 $fileToBackup = $(Get-ChildItem -Path $lastBackup -Recurse -File | Sort -desc)
@@ -45,11 +45,11 @@ foreach ($file in $fileFromBackup) {
   Write-Output """$($file.FullName.replace($from,''))"",""$($file.Length)""" >> $log
 }
 
-If ($fileToBackup -ne $null) {
+If ($lastBackup -ne $null) {
   write-msg pwsh "Gray" "Compare File changing..."
 
   foreach ($toFile in $fileToBackup) {
-    $pathTo = $toFile.FullName.replace($lastBackup,'')
+    $pathTo = $toFile.FullName.replace($(Join-Path -Path $lastBackup -ChildPath $folderName),'')
     $found = $False
     $foundFile = $null
     foreach ($fromFile in $fileFromBackup) {
