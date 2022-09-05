@@ -7,7 +7,7 @@ IF %ERRORLEVEL% NEQ 0 (
   GOTO FAIL
 )
 
-pwsh.exe -nol -File "%pwd%/engine.ps1" -from "%1" -to "%2"
+pwsh.exe -nol -File "%pwd%/engine.ps1" -from ""%1"" -to ""%2""
 IF %ERRORLEVEL% NEQ 0 (
   GOTO FAIL
 ) ELSE (

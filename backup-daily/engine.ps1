@@ -14,6 +14,8 @@ IF ($PSVersionTable.PSVersion.Major -lt 7) {
   exit 1
 }
 
+$from = $from.Trim('"')
+$to = $to.Trim('"')
 write-msg "pwsh" "Gray" "Initialize..."
 IF ((Test-Path -Path $from -PathType Container) -eq $False) {
   write-msg "pwsh" "Red" "Not exists $from"
@@ -31,9 +33,10 @@ $log = $(Join-Path -Path $to -ChildPath "$($dateTime)_$($folderName).txt")
 $toDir = $(Join-Path -Path $to -ChildPath $(Get-Date -Format "yyyyMMdd") -AdditionalChildPath $folderName)
 New-Item -ItemType "Directory" -Path $toDir -Force > $null
 
-$fileFromBackup = $(Get-ChildItem -Path $from -Recurse -File | Sort -desc)
-$fileToBackup = $(Get-ChildItem -Path $toDir -Recurse -File | Sort -desc)
+$lastBackup = $(Get-ChildItem -Path $toDir -Directory | sort Name | select -last 1)
 
+$fileFromBackup = $(Get-ChildItem -Path $from -Recurse -File | Sort -desc)
+$fileToBackup = $(Get-ChildItem -Path $lastBackup -Recurse -File | Sort -desc)
 
 Write-Output """fullname"",""size""" > $log
 $intSize = 0
@@ -46,7 +49,7 @@ If ($fileToBackup -ne $null) {
   write-msg pwsh "Gray" "Compare File changing..."
 
   foreach ($toFile in $fileToBackup) {
-    $pathTo = $toFile.FullName.replace($toDir,'')
+    $pathTo = $toFile.FullName.replace($lastBackup,'')
     $found = $False
     $foundFile = $null
     foreach ($fromFile in $fileFromBackup) {
@@ -67,18 +70,17 @@ If ($fileToBackup -ne $null) {
 }
 
 write-msg "pwsh" "Gray" "Backup from '$folderName' to '$to'..."
-
-# Copy-Item $from -Destination $toDir -Recurse -Force
-$i = 0
-foreach ($file in $fileFromBackup) {
-  $i++
-  Write-Progress -activity "$(Get-Date -Format "HH:mm:ss.ff") [copy]" -status $file.FullName.replace($from,'') -PercentComplete ($i * 100 / $fileFromBackup.Length)
-  $dir = $file.FullName.replace($from,'').replace($file.Name,'')
-  IF ((Test-Path -Path $(Join-Path -Path $toDir -ChildPath $dir) -PathType Container) -eq $False) {
-    New-Item -ItemType "Directory" -Path $(Join-Path -Path $toDir -ChildPath $dir) -Force > $null
-  }
-  Copy-Item $file.FullName -Destination $(Join-Path -Path $toDir -ChildPath $dir -AdditionalChildPath $file.Name) -Force
-}
+Copy-Item $from -Destination $(Join-Path -Path $to -ChildPath $(Get-Date -Format "yyyyMMdd")) -Recurse -Force
+# $i = 0
+# foreach ($file in $fileFromBackup) {
+#   $i++
+#   Write-Progress -activity "$(Get-Date -Format "HH:mm:ss.ff") [copy]" -status $file.FullName.replace($from,'') -PercentComplete ($i * 100 / $fileFromBackup.Length)
+#   $dir = $file.FullName.replace($from,'').replace($file.Name,'')
+#   IF ((Test-Path -Path $(Join-Path -Path $toDir -ChildPath $dir) -PathType Container) -eq $False) {
+#     New-Item -ItemType "Directory" -Path $(Join-Path -Path $toDir -ChildPath $dir) -Force > $null
+#   }
+#   Copy-Item $file.FullName -Destination $(Join-Path -Path $toDir -ChildPath $dir -AdditionalChildPath $file.Name) -Force
+# }
 write-msg "pwsh" "Gray" "Total file: $($fileFromBackup.Length)"
 write-msg "pwsh" "Gray" "Total size: $([Math]::Round($intSize/1MB,4,[MidPointRounding]::AwayFromZero)) MB."
 
